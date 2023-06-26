@@ -1,7 +1,7 @@
-import re
 import json
-from typing import List, Dict, Tuple, Any
+import re
 from collections import Counter
+from typing import Any, Dict, List, Tuple
 
 import numpy as np  # type: ignore
 import pandas as pd
@@ -11,7 +11,9 @@ from sklearn.model_selection import train_test_split  # type: ignore
 from config import config
 
 
-def replace_oos_labels(df: pd.DataFrame, labels: List[str], label_col: str, oos_label: str = "other") -> pd.DataFrame:
+def replace_oos_labels(
+    df: pd.DataFrame, labels: List[str], label_col: str, oos_label: str = "other"
+) -> pd.DataFrame:
     """
     Replace out of scope (OOS) labels.
 
@@ -24,14 +26,16 @@ def replace_oos_labels(df: pd.DataFrame, labels: List[str], label_col: str, oos_
     Returns:
         pd.DataFrame: Dataframe with replaced OOS labels.
     """
-    oos_tags = [item for item in df[label_col].unique(  # type: ignore
-    ) if item not in labels]  # type: ignore
-    df[label_col] = df[label_col].apply(  # type: ignore
-        lambda x: oos_label if x in oos_tags else x)
+    oos_tags = [  # type: ignore
+        item for item in df[label_col].unique() if item not in labels  # type: ignore
+    ]
+    df[label_col] = df[label_col].apply(lambda x: oos_label if x in oos_tags else x)  # type: ignore
     return df
 
 
-def replace_minority_labels(df: pd.DataFrame, label_col: str, min_freq: int, new_label: str = "other") -> pd.DataFrame:
+def replace_minority_labels(
+    df: pd.DataFrame, label_col: str, min_freq: int, new_label: str = "other"
+) -> pd.DataFrame:
     """
     Replace minority labels with another label.
 
@@ -46,14 +50,18 @@ def replace_minority_labels(df: pd.DataFrame, label_col: str, min_freq: int, new
     """
     labels = Counter(df[label_col].values)  # type: ignore
     labels_above_freq = Counter(  # type: ignore
-        label for label in labels.elements() if (labels[label] >= min_freq))  # type: ignore
+        label for label in labels.elements() if (labels[label] >= min_freq)  # type: ignore
+    )
     df[label_col] = df[label_col].apply(  # type: ignore
-        lambda label: label if label in labels_above_freq else None)  # type: ignore
+        lambda label: label if label in labels_above_freq else None  # type: ignore
+    )
     df[label_col] = df[label_col].fillna(new_label)  # type: ignore
     return df
 
 
-def clean_text(text: str, lower: bool = True, stem: bool = False, stopwords: List[str] = config.STOPWORDS) -> str:
+def clean_text(
+    text: str, lower: bool = True, stem: bool = False, stopwords: List[str] = config.STOPWORDS
+) -> str:
     """
     clean_text _summary_
 
@@ -72,8 +80,8 @@ def clean_text(text: str, lower: bool = True, stem: bool = False, stopwords: Lis
 
     # Remove stopwords
     if len(stopwords):
-        pattern = re.compile(r'\b(' + r"|".join(stopwords) + r")\b\s*")
-        text = pattern.sub('', text)
+        pattern = re.compile(r"\b(" + r"|".join(stopwords) + r")\b\s*")
+        text = pattern.sub("", text)
 
     # Spacing and filters
     text = re.sub(
@@ -89,8 +97,9 @@ def clean_text(text: str, lower: bool = True, stem: bool = False, stopwords: Lis
     # Stemming
     if stem:
         stemmer = PorterStemmer()
-        text = " ".join([stemmer.stem(word, to_lowercase=lower)  # type: ignore
-                        for word in text.split(" ")])  # type: ignore
+        text = " ".join(
+            [stemmer.stem(word, to_lowercase=lower) for word in text.split(" ")]  # type: ignore
+        )  # type: ignore
 
     return text
 
@@ -184,7 +193,7 @@ class LabelEncoder(object):
         return cls(**kwargs)
 
 
-def get_data_splits(X: pd.Series, y: np.ndarray, train_size: float = 0.7) -> Tuple[Any]: # type: ignore
+def get_data_splits(X: pd.Series, y: np.ndarray, train_size: float = 0.7) -> Tuple[Any]:  # type: ignore
     """
     Generate balanced data splits.
 
@@ -197,7 +206,9 @@ def get_data_splits(X: pd.Series, y: np.ndarray, train_size: float = 0.7) -> Tup
         Tuple[Any]: data splits as Numpy arrays.
     """
     X_train, X_, y_train, y_ = train_test_split(  # type: ignore
-        X, y, train_size=train_size, stratify=y)
+        X, y, train_size=train_size, stratify=y
+    )
     X_val, X_test, y_val, y_test = train_test_split(  # type: ignore
-        X_, y_, train_size=0.5, stratify=y_)  # type: ignore
+        X_, y_, train_size=0.5, stratify=y_  # type: ignore
+    )
     return X_train, X_val, X_test, y_train, y_val, y_test  # type: ignore

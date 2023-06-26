@@ -4,21 +4,21 @@ import tempfile
 import warnings
 from argparse import Namespace
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Dependent package
-import joblib # type: ignore
-import mlflow # type: ignore
+import joblib  # type: ignore
+import mlflow  # type: ignore
 import optuna
-import tempfile # type: ignore
 import pandas as pd
-from numpyencoder import NumpyEncoder # type: ignore
+from numpyencoder import NumpyEncoder  # type: ignore
 from optuna.integration.mlflow import MLflowCallback
 
-# Library modules
-from mlops import utils, data, train, predict
 from config import config
 from config.config import logger
+
+# Library modules
+from mlops import data, predict, train, utils
 
 warnings.filterwarnings("ignore")
 
@@ -28,8 +28,8 @@ def elt_data() -> None:
     # Extract + Load
     projects = pd.read_csv(config.PROJECTS_URL)  # type: ignore
     tags = pd.read_csv(config.TAGS_URL)  # type: ignore
-    projects.to_csv(Path(config.DATA_DIR, 'projects.csv'), index=False)
-    tags.to_csv(Path(config.DATA_DIR, 'tags.csv'), index=False)
+    projects.to_csv(Path(config.DATA_DIR, "projects.csv"), index=False)
+    tags.to_csv(Path(config.DATA_DIR, "tags.csv"), index=False)
 
     # Transform
     df = pd.merge(projects, tags, on="id")  # type: ignore
@@ -43,7 +43,7 @@ def train_model(
     args_fp: str = "config/args.json",
     experiment_name: str = "baselines",
     run_name: str = "sgd",
-    test_run: bool = False
+    test_run: bool = False,
 ) -> None:
     """
     Train a model given arguments.
@@ -55,7 +55,7 @@ def train_model(
         test_run (bool, optional): If True, artifacts will not be saved. Defaults to False.
     """
     # Load labeled data
-    df = pd.read_csv(Path(config.DATA_DIR, "labeled_projects.csv")) # type: ignore
+    df = pd.read_csv(Path(config.DATA_DIR, "labeled_projects.csv"))  # type: ignore
 
     # Train
     args = Namespace(**utils.load_dict(file_path=args_fp))
@@ -76,29 +76,23 @@ def train_model(
 
         # Log artifacts
         with tempfile.TemporaryDirectory() as dp:
-            utils.save_dict(vars(artifacts["args"]), Path(  # type: ignore
-                dp, "args.json"), cls=NumpyEncoder)
+            utils.save_dict(
+                vars(artifacts["args"]), Path(dp, "args.json"), cls=NumpyEncoder  # type: ignore
+            )
             artifacts["label_encoder"].save(Path(dp, "label_encoder.json"))
-            joblib.dump(artifacts["vectorizer"], Path(  # type: ignore
-                dp, "vectorizer.pkl"))
-            joblib.dump(artifacts["model"], Path(  # type: ignore
-                dp, "model.pkl"))
-            utils.save_dict(performance, Path(
-                dp, "performance.json"))  # type: ignore
+            joblib.dump(artifacts["vectorizer"], Path(dp, "vectorizer.pkl"))  # type: ignore
+            joblib.dump(artifacts["model"], Path(dp, "model.pkl"))  # type: ignore
+            utils.save_dict(performance, Path(dp, "performance.json"))  # type: ignore
             mlflow.log_artifacts(dp)
 
     # Save to config
     if not test_run:  # pragma: no cover, actual run
-        open(Path(config.CONFIG_DIR, "run_id.txt"),
-             "w").write(run_id)  # type: ignore
-        utils.save_dict(performance, Path(  # type: ignore
-            config.CONFIG_DIR, "performance.json"))
+        open(Path(config.CONFIG_DIR, "run_id.txt"), "w").write(run_id)  # type: ignore
+        utils.save_dict(performance, Path(config.CONFIG_DIR, "performance.json"))  # type: ignore
 
 
 def optimize(
-    args_fp: str = "config/args.json",
-    study_name: str = "optimization",
-    num_trials: int = 20
+    args_fp: str = "config/args.json", study_name: str = "optimization", num_trials: int = 20
 ) -> None:
     """
     Optimize hyperparameters.
@@ -109,56 +103,48 @@ def optimize(
         num_trials (int, optional): number of trials to run in study. Defaults to 20.
     """
     # Load labeled data
-    df = pd.read_csv(Path(config.DATA_DIR, "labeled_projects.csv")) # type: ignore
+    df = pd.read_csv(Path(config.DATA_DIR, "labeled_projects.csv"))  # type: ignore
 
     # Optimize
     args = Namespace(**utils.load_dict(file_path=args_fp))
     pruner = optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=5)
-    study = optuna.create_study(
-        study_name=study_name, direction="maximize", pruner=pruner)
-    mlflow_callback = MLflowCallback(
-        tracking_uri=mlflow.get_tracking_uri(), metric_name="f1")
+    study = optuna.create_study(study_name=study_name, direction="maximize", pruner=pruner)
+    mlflow_callback = MLflowCallback(tracking_uri=mlflow.get_tracking_uri(), metric_name="f1")
     study.optimize(
         lambda trial: train.objective(args, df, trial),
         n_trials=num_trials,
-        callbacks=[mlflow_callback])
+        callbacks=[mlflow_callback],
+    )
 
     # Best trial
     trials_df = study.trials_dataframe()  # type: ignore
-    trials_df = trials_df.sort_values(  # type: ignore
-        ["user_attrs_f1"], ascending=False)
-    utils.save_dict({**args.__dict__, **study.best_trial.params},
-                    args_fp, cls=NumpyEncoder)
+    trials_df = trials_df.sort_values(["user_attrs_f1"], ascending=False)  # type: ignore
+    utils.save_dict({**args.__dict__, **study.best_trial.params}, args_fp, cls=NumpyEncoder)
     print(f"\nBest value (f1): {study.best_trial.value}")
-    print(
-        f"Best hyperparameters: {json.dumps(study.best_trial.params, indent=2)}")
+    print(f"Best hyperparameters: {json.dumps(study.best_trial.params, indent=2)}")
 
 
 def load_artifacts(run_id: str = "") -> Dict[str, Any]:
     """Load artifacts for a given run_id."""
     # Locate specifics artifacts directory
-    experiment_id = mlflow.get_run(  # type: ignore
-        run_id=run_id).info.experiment_id
-    artifacts_dir = Path(config.MODEL_REGISTRY,
-                         experiment_id, run_id, "artifacts")  # type: ignore
+    experiment_id = mlflow.get_run(run_id=run_id).info.experiment_id  # type: ignore
+    artifacts_dir = Path(config.MODEL_REGISTRY, experiment_id, run_id, "artifacts")  # type: ignore
 
     # Load objects from run
-    args = Namespace(
-        **utils.load_dict(file_path=Path(artifacts_dir, "args.json")))  # type: ignore
-    vectorizer = joblib.load(  # type: ignore
-        Path(artifacts_dir, "vectorizer.pkl"))
+    args = Namespace(**utils.load_dict(file_path=Path(artifacts_dir, "args.json")))  # type: ignore
+    vectorizer = joblib.load(Path(artifacts_dir, "vectorizer.pkl"))  # type: ignore
     label_encoder = data.LabelEncoder.load(  # type: ignore
-        fp=Path(artifacts_dir, "label_encoder.json"))  # type: ignore
+        fp=Path(artifacts_dir, "label_encoder.json")  # type: ignore
+    )
     model = joblib.load(Path(artifacts_dir, "model.pkl"))  # type: ignore
-    performance = utils.load_dict(
-        file_path=str(Path(artifacts_dir, "performance.json")))
+    performance = utils.load_dict(file_path=str(Path(artifacts_dir, "performance.json")))
 
     return {
         "args": args,
         "label_encoder": label_encoder,
         "vectorizer": vectorizer,
         "model": model,
-        "performance": performance
+        "performance": performance,
     }
 
 

@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import numpy as np  # type: ignore
 import pandas as pd
@@ -12,7 +12,7 @@ def nlp_cnn(x: pd.DataFrame):
     """NLP Projects that use convolution."""
     nlp_projects = "natural-language-processing" in x.tag  # type: ignore
     convolution_projects = "CNN" in x.text or "convolution" in x.text  # type: ignore
-    return (nlp_projects and convolution_projects)
+    return nlp_projects and convolution_projects
 
 
 @slicing_function()
@@ -21,7 +21,9 @@ def short_text(x: pd.DataFrame):
     return len(x.text.split()) < 8  # less than 8 words # type: ignore
 
 
-def get_slice_metrics(y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarray) -> Dict[str, Dict[str, Any]]:
+def get_slice_metrics(
+    y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarray
+) -> Dict[str, Dict[str, Any]]:
     """
     Generate metrics for slices of data.
 
@@ -48,7 +50,9 @@ def get_slice_metrics(y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarra
     return metrics
 
 
-def get_metrics(y_true: np.ndarray, y_pred: np.ndarray, classes: List[str], df: pd.DataFrame = pd.DataFrame()) -> Dict[str, Dict[str, Any]]:
+def get_metrics(
+    y_true: np.ndarray, y_pred: np.ndarray, classes: List[str], df: pd.DataFrame = pd.DataFrame()
+) -> Dict[str, Dict[str, Any]]:
     """
     Performance metrics using ground truths and predictions.
 
@@ -65,16 +69,14 @@ def get_metrics(y_true: np.ndarray, y_pred: np.ndarray, classes: List[str], df: 
     metrics: Dict[str, Dict[str, Any]] = {"overall": {}, "class": {}}
 
     # Overall metrics
-    overall_metrics = precision_recall_fscore_support(
-        y_true, y_pred, average="weighted")
+    overall_metrics = precision_recall_fscore_support(y_true, y_pred, average="weighted")
     metrics["overall"]["precision"] = overall_metrics[0]
     metrics["overall"]["recall"] = overall_metrics[1]
     metrics["overall"]["f1"] = overall_metrics[2]
     metrics["overall"]["num_samples"] = np.float64(len(y_true))  # type: ignore
 
     # Per-class metrics
-    class_metrics = precision_recall_fscore_support(
-        y_true, y_pred, average=None)
+    class_metrics = precision_recall_fscore_support(y_true, y_pred, average=None)
     for i, _class in enumerate(classes):
         metrics["class"][_class] = {
             "precision": class_metrics[0][i],  # type: ignore
@@ -87,6 +89,7 @@ def get_metrics(y_true: np.ndarray, y_pred: np.ndarray, classes: List[str], df: 
     if not df.empty:
         slices = PandasSFApplier([nlp_cnn, short_text]).apply(df)
         metrics["slices"] = get_slice_metrics(
-            y_true=y_true, y_pred=y_pred, slices=slices)  # type: ignore
+            y_true=y_true, y_pred=y_pred, slices=slices
+        )  # type: ignore
 
     return metrics

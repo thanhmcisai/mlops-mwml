@@ -1,7 +1,8 @@
 import json
-import numpy as np  # type: ignore
 import random
 from typing import Any, Dict
+
+import numpy as np  # type: ignore
 
 
 def load_dict(file_path: str) -> Dict[str, Any]:
@@ -18,7 +19,9 @@ def load_dict(file_path: str) -> Dict[str, Any]:
     return d
 
 
-def save_dict(dict_data: Dict[str, Any], file_path: str, cls: Any = None, sort_keys: bool = False) -> None:
+def save_dict(
+    dict_data: Dict[str, Any], file_path: str, cls: Any = None, sort_keys: bool = False
+) -> None:
     """
     Save a dictionary to a specific location.
 
@@ -31,7 +34,7 @@ def save_dict(dict_data: Dict[str, Any], file_path: str, cls: Any = None, sort_k
     Returns:
         None
     """
-    with open(file_path, 'w') as fp:
+    with open(file_path, "w") as fp:
         json.dump(dict_data, indent=2, fp=fp, cls=cls, sort_keys=sort_keys)
 
 
