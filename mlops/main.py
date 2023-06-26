@@ -6,11 +6,13 @@ from argparse import Namespace
 from pathlib import Path
 from typing import Any, Dict, List
 
-# Dependent package
 import joblib  # type: ignore
 import mlflow  # type: ignore
 import optuna
 import pandas as pd
+
+# Dependent package
+import typer
 from numpyencoder import NumpyEncoder  # type: ignore
 from optuna.integration.mlflow import MLflowCallback
 
@@ -22,7 +24,11 @@ from mlops import data, predict, train, utils
 
 warnings.filterwarnings("ignore")
 
+# Initialize Typer CLI app
+app = typer.Typer()
 
+
+@app.command()
 def elt_data() -> None:
     """Extract, load and transform our data assets."""
     # Extract + Load
@@ -39,6 +45,7 @@ def elt_data() -> None:
     logger.info("✅ Saved data!")
 
 
+@app.command()
 def train_model(
     args_fp: str = "config/args.json",
     experiment_name: str = "baselines",
@@ -91,6 +98,7 @@ def train_model(
         utils.save_dict(performance, Path(config.CONFIG_DIR, "performance.json"))  # type: ignore
 
 
+@app.command()
 def optimize(
     args_fp: str = "config/args.json", study_name: str = "optimization", num_trials: int = 20
 ) -> None:
@@ -124,6 +132,7 @@ def optimize(
     print(f"Best hyperparameters: {json.dumps(study.best_trial.params, indent=2)}")
 
 
+@app.command()
 def load_artifacts(run_id: str = "") -> Dict[str, Any]:
     """Load artifacts for a given run_id."""
     # Locate specifics artifacts directory
@@ -134,7 +143,7 @@ def load_artifacts(run_id: str = "") -> Dict[str, Any]:
     args = Namespace(**utils.load_dict(file_path=Path(artifacts_dir, "args.json")))  # type: ignore
     vectorizer = joblib.load(Path(artifacts_dir, "vectorizer.pkl"))  # type: ignore
     label_encoder = data.LabelEncoder.load(  # type: ignore
-        fp=Path(artifacts_dir, "label_encoder.json")  # type: ignore
+        file_path=Path(artifacts_dir, "label_encoder.json")  # type: ignore
     )
     model = joblib.load(Path(artifacts_dir, "model.pkl"))  # type: ignore
     performance = utils.load_dict(file_path=str(Path(artifacts_dir, "performance.json")))
@@ -148,6 +157,7 @@ def load_artifacts(run_id: str = "") -> Dict[str, Any]:
     }
 
 
+@app.command()
 def predict_tag(text: str = "", run_id: str = "") -> List[Dict[str, Any]]:
     """
     Predict tag for text.
@@ -168,4 +178,4 @@ def predict_tag(text: str = "", run_id: str = "") -> List[Dict[str, Any]]:
 
 
 if __name__ == "__main__":
-    pass
+    app()  # pragma: no cover, live app
