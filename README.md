@@ -55,4 +55,6 @@ def replace_oos_labels(df, labels, label_col, oos_label="other"):
     return df
 ```
 
-##
+# Logging
+
+The Elastic stack (formerly ELK stack) is a common option for production level logging. It combines the features of Elasticsearch (distributed search engine), Logstash (ingestion pipeline) and Kibana (customizable visualization). We could also simply upload our logs to a cloud blog storage (ex. S3, Google Cloud Storage, etc.).

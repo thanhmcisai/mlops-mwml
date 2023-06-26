@@ -1,23 +1,39 @@
-import numpy as np
-from sklearn.metrics import precision_recall_fscore_support
-from snorkel.slicing import PandasSFApplier
-from snorkel.slicing import slicing_function
+from typing import Dict, List, Any
+
+import numpy as np  # type: ignore
+import pandas as pd
+from sklearn.metrics import precision_recall_fscore_support  # type: ignore
+from snorkel.slicing import PandasSFApplier  # type: ignore
+from snorkel.slicing import slicing_function  # type: ignore
+
 
 @slicing_function()
-def nlp_cnn(x):
+def nlp_cnn(x: pd.DataFrame):
     """NLP Projects that use convolution."""
-    nlp_projects = "natural-language-processing" in x.tag
-    convolution_projects = "CNN" in x.text or "convolution" in x.text
+    nlp_projects = "natural-language-processing" in x.tag  # type: ignore
+    convolution_projects = "CNN" in x.text or "convolution" in x.text  # type: ignore
     return (nlp_projects and convolution_projects)
 
-@slicing_function()
-def short_text(x):
-    """Projects with short titles and descriptions."""
-    return len(x.text.split()) < 8  # less than 8 words
 
-def get_slice_metrics(y_true, y_pred, slices):
-    """Generate metrics for slices of data."""
-    metrics = {}
+@slicing_function()
+def short_text(x: pd.DataFrame):
+    """Projects with short titles and descriptions."""
+    return len(x.text.split()) < 8  # less than 8 words # type: ignore
+
+
+def get_slice_metrics(y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarray) -> Dict[str, Dict[str, Any]]:
+    """
+    Generate metrics for slices of data.
+
+    Args:
+        y_true (np.ndarray): true labels.
+        y_pred (np.ndarray): predicted labels.
+        slices (np.recarray): generated slices.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: slice metrics
+    """
+    metrics: Dict[str, Dict[str, Any]] = {}
     for slice_name in slices.dtype.names:
         mask = slices[slice_name].astype(bool)
         if sum(mask):
@@ -31,32 +47,46 @@ def get_slice_metrics(y_true, y_pred, slices):
             metrics[slice_name]["num_samples"] = len(y_true[mask])
     return metrics
 
-def get_metrics(y_true, y_pred, classes, df=None):
-    """Performance metrics using ground truths and predictions."""
+
+def get_metrics(y_true: np.ndarray, y_pred: np.ndarray, classes: List[str], df: pd.DataFrame = pd.DataFrame()) -> Dict[str, Dict[str, Any]]:
+    """
+    Performance metrics using ground truths and predictions.
+
+    Args:
+        y_true (np.ndarray): true labels.
+        y_pred (np.ndarray): predicted labels.
+        classes (List[str]): list of class labels.
+        df (pd.DataFrame, optional): dataframe to generate slice metrics on. Defaults to pd.DataFrame().
+
+    Returns:
+        Dict[str, Dict[str, Any]]: performance metrics
+    """
     # Performance
-    metrics = {"overall": {}, "class": {}}
+    metrics: Dict[str, Dict[str, Any]] = {"overall": {}, "class": {}}
 
     # Overall metrics
-    overall_metrics = precision_recall_fscore_support(y_true, y_pred, average="weighted")
+    overall_metrics = precision_recall_fscore_support(
+        y_true, y_pred, average="weighted")
     metrics["overall"]["precision"] = overall_metrics[0]
     metrics["overall"]["recall"] = overall_metrics[1]
     metrics["overall"]["f1"] = overall_metrics[2]
-    metrics["overall"]["num_samples"] = np.float64(len(y_true))
+    metrics["overall"]["num_samples"] = np.float64(len(y_true))  # type: ignore
 
     # Per-class metrics
-    class_metrics = precision_recall_fscore_support(y_true, y_pred, average=None)
+    class_metrics = precision_recall_fscore_support(
+        y_true, y_pred, average=None)
     for i, _class in enumerate(classes):
         metrics["class"][_class] = {
-            "precision": class_metrics[0][i],
-            "recall": class_metrics[1][i],
-            "f1": class_metrics[2][i],
-            "num_samples": np.float64(class_metrics[3][i]),
+            "precision": class_metrics[0][i],  # type: ignore
+            "recall": class_metrics[1][i],  # type: ignore
+            "f1": class_metrics[2][i],  # type: ignore
+            "num_samples": np.float64(class_metrics[3][i]),  # type: ignore
         }
 
     # Slice metrics
-    if df is not None:
+    if not df.empty:
         slices = PandasSFApplier([nlp_cnn, short_text]).apply(df)
         metrics["slices"] = get_slice_metrics(
-            y_true=y_true, y_pred=y_pred, slices=slices)
+            y_true=y_true, y_pred=y_pred, slices=slices)  # type: ignore
 
     return metrics

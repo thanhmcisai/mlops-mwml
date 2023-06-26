@@ -1,31 +1,32 @@
 import json
-import numpy as np
+import numpy as np  # type: ignore
 import random
-from typing import Any
+from typing import Any, Dict
 
-def load_dict(file_path: str) -> dict:
-    """
-    Load a dictionary from a JSON's filepath
+
+def load_dict(file_path: str) -> Dict[str, Any]:
+    """Load a dictionary from a JSON's filepath.
 
     Args:
-        file_path - str: path to json file
+        file_path (str): location of file.
 
     Returns:
-        dict: Dictionary loaded from json file
+        Dict: loaded JSON data.
     """
     with open(file_path, "r") as fp:
         d = json.load(fp)
     return d
 
-def save_dict(dict_data: dict, file_path: str, cls: Any = None, sort_keys: bool = False) -> None:
+
+def save_dict(dict_data: Dict[str, Any], file_path: str, cls: Any = None, sort_keys: bool = False) -> None:
     """
     Save a dictionary to a specific location.
 
     Args:
-        dict_data (dict): _description_
-        file_path (str): _description_
-        cls (Any, optional): _description_. Defaults to None.
-        sort_keys (bool, optional): _description_. Defaults to False.
+        dict_data (dict): data to save.
+        file_path (str): location of where to save the data.
+        cls (Any, optional): encoder to use on dict data. Defaults to None.
+        sort_keys (bool, optional): whether to sort keys alphabetically. Defaults to False.
 
     Returns:
         None
@@ -33,16 +34,17 @@ def save_dict(dict_data: dict, file_path: str, cls: Any = None, sort_keys: bool 
     with open(file_path, 'w') as fp:
         json.dump(dict_data, indent=2, fp=fp, cls=cls, sort_keys=sort_keys)
 
+
 def set_seeds(seed: int = 42) -> None:
     """
     Set seeds for reproducibility.
 
     Args:
-        seed (int): _description_. Defaults to 42.
+        seed (int): number to be used as the seed. Defaults to 42.
 
     Returns:
         None
     """
     # Set seeds
-    np.random.seed(seed)
+    np.random.seed(seed)  # type: ignore
     random.seed(seed)

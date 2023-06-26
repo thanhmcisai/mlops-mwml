@@ -1,0 +1,19 @@
+# mkdocs.yml
+site_name: Start to MLOps
+# site_url:
+repo_url: https://github.com/thanhmcisai/mlops-mwml
+nav:
+  - Home: index.md
+  - workflows:
+    - main: mlops/main.md
+  - mlops:
+    - data: mlops/data.md
+    - evaluate: mlops/evaluate.md
+    - predict: mlops/predict.md
+    - train: mlops/train.md
+    - utils: mlops/utils.md
+theme: readthedocs
+plugins:
+  - mkdocstrings
+watch:
+  - .  # reload docs for any file changes
