@@ -58,3 +58,20 @@ def replace_oos_labels(df, labels, label_col, oos_label="other"):
 # Logging
 
 The Elastic stack (formerly ELK stack) is a common option for production level logging. It combines the features of Elasticsearch (distributed search engine), Logstash (ingestion pipeline) and Kibana (customizable visualization). We could also simply upload our logs to a cloud blog storage (ex. S3, Google Cloud Storage, etc.).
+
+# Best practices for API serving
+
+When designing our API, there are some best practices to follow:
+
+- URI paths, messages, etc. should be as explicit as possible. Avoid using cryptic resource names, etc.
+- Use nouns, instead of verbs, for naming resources. The request method already accounts for the verb (✅ GET /users not ❌ GET /get_users).
+- Plural nouns (✅ GET /users/{userId} not ❌ GET /user/{userID}).
+- Use dashes in URIs for resources and path parameters but use underscores for query parameters (GET /nlp-models/?find_desc=bert).
+- Return appropriate HTTP and informative messages to the user.
+
+# Serving with RESTfull API
+
+```bash
+uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload --reload-dir tagifai --reload-dir app  # dev
+gunicorn -c app/gunicorn.py -k uvicorn.workers.UvicornWorker app.api:app  # prod
+```
