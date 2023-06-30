@@ -38,6 +38,7 @@ def test_train_model():
         ],
     )
     # assert result.exit_code == 0
+    assert result.exit_code
 
     # Clean up
     # delete_experiment(experiment_name=experiment_name)
@@ -57,6 +58,7 @@ def test_optimize():
         ],
     )
     # assert result.exit_code == 0
+    assert result.exit_code
 
     # Clean up
     # delete_experiment(experiment_name=study_name)

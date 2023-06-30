@@ -86,7 +86,7 @@ def get_metrics(
         }
 
     # Slice metrics
-    if df is not None and not df.empty: # type: ignore
+    if df is not None and not df.empty:  # type: ignore
         slices = PandasSFApplier([nlp_cnn, short_text]).apply(df)
         metrics["slices"] = get_slice_metrics(
             y_true=y_true, y_pred=y_pred, slices=slices

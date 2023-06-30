@@ -2,13 +2,14 @@ import tempfile
 from pathlib import Path
 from typing import List
 
-import numpy as np # type: ignore
+import numpy as np  # type: ignore
 import pandas as pd
-import pytest # type: ignore
+import pytest  # type: ignore
 
 from mlops import data
 
-@pytest.fixture(scope="module") # type: ignore
+
+@pytest.fixture(scope="module")  # type: ignore
 def df() -> pd.DataFrame:
     data = [
         {"title": "a0", "description": "b0", "tag": "c0"},
@@ -22,7 +23,7 @@ def df() -> pd.DataFrame:
     return df
 
 
-@pytest.mark.parametrize( # type: ignore
+@pytest.mark.parametrize(  # type: ignore
     "labels, unique_labels",
     [
         ([], ["other"]),  # no set of approved labels
@@ -35,10 +36,10 @@ def test_replace_oos_labels(df: pd.DataFrame, labels: List[str], unique_labels: 
     replaced_df = data.replace_oos_labels(
         df=df.copy(), labels=labels, label_col="tag", oos_label="other"
     )
-    assert set(replaced_df.tag.unique()) == set(unique_labels) # type: ignore
+    assert set(replaced_df.tag.unique()) == set(unique_labels)  # type: ignore
 
 
-@pytest.mark.parametrize( # type: ignore
+@pytest.mark.parametrize(  # type: ignore
     "min_freq, unique_labels",
     [
         (0 * 10, ["c0", "c1", "c2"]),
@@ -52,10 +53,10 @@ def test_replace_minority_labels(df: pd.DataFrame, min_freq: int, unique_labels:
     replaced_df = data.replace_minority_labels(
         df=df.copy(), label_col="tag", min_freq=min_freq, new_label="other"
     )
-    assert set(replaced_df.tag.unique()) == set(unique_labels) # type: ignore
+    assert set(replaced_df.tag.unique()) == set(unique_labels)  # type: ignore
 
 
-@pytest.mark.parametrize( # type: ignore
+@pytest.mark.parametrize(  # type: ignore
     "text, lower, stem, stopwords, cleaned_text",
     [
         ("Hello worlds", False, False, [], "Hello worlds"),
@@ -82,6 +83,7 @@ def test_preprocess(df: pd.DataFrame):
     assert "text" not in df.columns
     df = data.preprocess(df=df, lower=True, stem=False, min_freq=0)
     assert "text" in df.columns
+
 
 class TestLabelEncoder:
     @classmethod
@@ -139,19 +141,26 @@ class TestLabelEncoder:
         y_decoded = ["apple", "apple", "banana"]
         label_encoder = data.LabelEncoder(class_to_index=class_to_index)
         label_encoder.fit(["apple", "apple", "banana"])
-        assert np.array_equal(label_encoder.encode(y_decoded), np.array(y_encoded)) # type: ignore
+        assert np.array_equal(label_encoder.encode(y_decoded), np.array(y_encoded))  # type: ignore
         assert label_encoder.decode(y_encoded) == y_decoded
 
+
 def test_get_data_splits(df: pd.DataFrame):
-    df = df.sample(frac=1).reset_index(drop=True) # type: ignore
+    df = df.sample(frac=1).reset_index(drop=True)  # type: ignore
     df = data.preprocess(df, lower=True, stem=False, min_freq=0)
-    label_encoder = data.LabelEncoder().fit(df.tag) # type: ignore
-    X_train, X_val, X_test, y_train, y_val, y_test = data.get_data_splits( # type: ignore
-        X=df.text.to_numpy(), y=label_encoder.encode(df.tag) # type: ignore
+    label_encoder = data.LabelEncoder().fit(df.tag)  # type: ignore
+    X_train, X_val, X_test, y_train, y_val, y_test = data.get_data_splits(  # type: ignore
+        X=df.text.to_numpy(), y=label_encoder.encode(df.tag)  # type: ignore
     )
-    assert len(X_train) == len(y_train) # type: ignore
-    assert len(X_val) == len(y_val) # type: ignore
-    assert len(X_test) == len(y_test) # type: ignore
-    assert len(X_train) / float(len(df)) == pytest.approx(0.7, abs=0.05)  # 0.7 ± 0.05 # type: ignore
-    assert len(X_val) / float(len(df)) == pytest.approx(0.15, abs=0.05)  # 0.15 ± 0.05 # type: ignore
-    assert len(X_test) / float(len(df)) == pytest.approx(0.15, abs=0.05)  # 0.15 ± 0.05 # type: ignore
+    assert len(X_train) == len(y_train)  # type: ignore
+    assert len(X_val) == len(y_val)  # type: ignore
+    assert len(X_test) == len(y_test)  # type: ignore
+    assert len(X_train) / float(len(df)) == pytest.approx(
+        0.7, abs=0.05
+    )  # 0.7 ± 0.05 # type: ignore
+    assert len(X_val) / float(len(df)) == pytest.approx(
+        0.15, abs=0.05
+    )  # 0.15 ± 0.05 # type: ignore
+    assert len(X_test) / float(len(df)) == pytest.approx(
+        0.15, abs=0.05
+    )  # 0.15 ± 0.05 # type: ignore

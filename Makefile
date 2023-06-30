@@ -17,11 +17,14 @@ style:
 	python3 -m isort .
 
 # Environment
+.ONESHELL:
 venv:
 	python3 -m venv venv
 	source venv/bin/activate && \
-	python3 -m pip install pip setuptools wheel && \
-	python3 -m pip install -e .
+	python3 -m pip install --upgrade pip setuptools wheel && \
+	python3 -m pip install -e ".[dev]" && \
+	pre-commit install && \
+	pre-commit autoupdate
 
 # Cleaning
 .PHONY: clean
@@ -36,7 +39,7 @@ clean: style
 # Test
 .PHONY: test
 test:
-	pytest -m "not training"
-	cd tests && great_expectations checkpoint run projects
-	cd tests && great_expectations checkpoint run tags
-	cd tests && great_expectations checkpoint run labeled_projects
+	pytest -m "not training" && \
+	cd tests && great_expectations checkpoint run projects && \
+	great_expectations checkpoint run tags && \
+	great_expectations checkpoint run labeled_projects

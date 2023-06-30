@@ -1,15 +1,15 @@
-from pathlib import Path
-from http import HTTPStatus
-from functools import wraps
 from datetime import datetime
-from typing import Dict, Any, Tuple, Callable
+from functools import wraps
+from http import HTTPStatus
+from pathlib import Path
+from typing import Any, Callable, Dict, Tuple
 
 from fastapi import FastAPI, Request
 
-from mlops import main, predict
+from app.schemas import PredictPayload
 from config import config
 from config.config import logger
-from app.schemas import PredictPayload
+from mlops import main, predict
 
 # Define application
 app = FastAPI(
@@ -18,12 +18,14 @@ app = FastAPI(
     version="0.1",
 )
 
+
 @app.on_event("startup")
 def load_artifacts():
     global artifacts
     run_id = open(Path(config.CONFIG_DIR, "run_id.txt")).read()
     artifacts = main.load_artifacts(run_id=run_id)
     logger.info("Ready for inference!")
+
 
 def construct_response(func: Callable[..., Any]) -> Callable[..., Dict[str, Any]]:
     """Construct a JSON response for an endpoint."""
@@ -45,7 +47,7 @@ def construct_response(func: Callable[..., Any]) -> Callable[..., Dict[str, Any]
     return wrap
 
 
-@app.get('/', tags=["General"])
+@app.get("/", tags=["General"])
 @construct_response
 def _index(request: Request) -> Dict[str, Any]:
     """Health check"""
@@ -56,18 +58,20 @@ def _index(request: Request) -> Dict[str, Any]:
     }
     return response
 
+
 @app.get("/performance", tags=["Performance"])
 @construct_response
 def _performance(request: Request, filter: str = None) -> Dict:
     """Get the performance metrics."""
     performance = artifacts["performance"]
-    data = {"performance":performance.get(filter, performance)}
+    data = {"performance": performance.get(filter, performance)}
     response = {
         "message": HTTPStatus.OK.phrase,
         "status-code": HTTPStatus.OK,
         "data": data,
     }
     return response
+
 
 @app.get("/args/{arg}", tags=["Arguments"])
 @construct_response
@@ -82,6 +86,7 @@ def _arg(request: Request, arg: str) -> Dict:
     }
     return response
 
+
 @app.get("/args", tags=["Arguments"])
 @construct_response
 def _args(request: Request) -> Dict:
@@ -94,6 +99,7 @@ def _args(request: Request) -> Dict:
         },
     }
     return response
+
 
 @app.post("/predict", tags=["Prediction"])
 @construct_response
