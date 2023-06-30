@@ -5,10 +5,10 @@
   "lower": true,
   "stem": false,
   "analyzer": "char_wb",
-  "ngram_max_range": 4,
+  "ngram_max_range": 6,
   "alpha": 0.0001,
-  "learning_rate": 0.17911024111023935,
-  "power_t": 0.2468842754701795,
+  "learning_rate": 0.28642203102099817,
+  "power_t": 0.3788510305881938,
   "num_epochs": 100,
-  "threshold": 0.6467423965877417
+  "threshold": 0.41926853818049137
 }

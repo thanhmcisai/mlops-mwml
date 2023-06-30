@@ -34,7 +34,7 @@ def predict(texts: List[str], artifacts: Dict[str, Any]) -> List[Dict[str, Any]]
     predictions = [
         {
             "input_text": texts[i],
-            "predicted_tags": tags[i],
+            "predicted_tag": tags[i],
         }
         for i in range(len(tags))
     ]

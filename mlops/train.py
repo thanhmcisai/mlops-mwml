@@ -91,7 +91,7 @@ def train(args: Namespace, df: pd.DataFrame, trial: optuna.trial.Trial = None) -
             )  # type: ignore
 
         # Pruning (for optimization in next section)
-        if trial:
+        if trial:  # pragma: no cover, optuna pruning
             trial.report(val_loss, epoch)  # type: ignore
             if trial.should_prune():
                 raise optuna.TrialPruned()
