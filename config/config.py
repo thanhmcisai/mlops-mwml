@@ -14,11 +14,13 @@ DATA_DIR = Path(BASE_DIR, "data")
 LOGS_DIR = Path(BASE_DIR, "logs")
 STORES_DIR = Path(BASE_DIR, "stores")
 MODEL_REGISTRY = Path(STORES_DIR, "model")
+BLOB_STORE = Path(STORES_DIR, "blob")
 
 # Create dirs
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 MODEL_REGISTRY.mkdir(parents=True, exist_ok=True)
+BLOB_STORE.mkdir(parents=True, exist_ok=True)
 mlflow.set_tracking_uri("file://" + str(MODEL_REGISTRY.absolute()))
 
 # Assets

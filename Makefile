@@ -43,3 +43,11 @@ test:
 	cd tests && great_expectations checkpoint run projects && \
 	great_expectations checkpoint run tags && \
 	great_expectations checkpoint run labeled_projects
+
+# Data versioning
+.PHONY: dvc
+dvc:
+    dvc add data/projects.csv
+    dvc add data/tags.csv
+    dvc add data/labeled_projects.csv
+    dvc push
