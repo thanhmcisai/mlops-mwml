@@ -1,0 +1,12 @@
+[submodule "libs/testing-ml"]
+	path = libs/testing-ml
+	url = https://github.com/GokuMohandas/testing-ml
+[submodule "libs/monitoring-ml"]
+	path = libs/monitoring-ml
+	url = https://github.com/GokuMohandas/monitoring-ml
+[submodule "libs/feature-store"]
+	path = libs/feature-store
+	url = https://github.com/GokuMohandas/feature-store
+[submodule "libs/data-engineering"]
+	path = libs/data-engineering
+	url = https://github.com/GokuMohandas/data-engineering
