@@ -1,7 +1,8 @@
-import pandas as pd
 from pathlib import Path
-import streamlit as st
 
+import pandas as pd
+
+import streamlit as st
 from config import config
 from mlops import main, utils
 
@@ -11,6 +12,7 @@ def load_data():
     projects_fp = Path(config.DATA_DIR, "labeled_projects.csv")
     df = pd.read_csv(str(projects_fp))
     return df
+
 
 # Title
 st.title("MLOps Course · Made With ML")
