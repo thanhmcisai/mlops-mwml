@@ -14,6 +14,8 @@ docs_packages = ["mkdocs==1.3.0", "mkdocstrings==0.18.1"]
 
 style_packages = ["black==22.3.0", "flake8==3.9.2", "isort==5.10.1", "black[jupyter]"]
 
+lint_packages = ["mypy==1.4.1", "lxml==4.9.2"]
+
 DE_packages = ["google-api-core==1.33.2", "google-cloud-bigquery==1.21.0"]
 
 # Define our package
@@ -32,6 +34,7 @@ setup(
         + style_packages
         + test_packages
         + DE_packages
+        + lint_packages
         + ["pre-commit==2.19.0"],
         "docs": docs_packages,
         "test": test_packages,

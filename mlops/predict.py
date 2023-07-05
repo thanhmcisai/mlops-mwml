@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import numpy as np  # type: ignore
 
@@ -22,7 +22,7 @@ def custom_predict(y_prob: np.ndarray, threshold: float, index: int) -> np.ndarr
     return np.array(y_pred)  # type: ignore
 
 
-def predict(texts: List[str], artifacts: Dict[str, Any]) -> List[Dict[str, Any]]:
+def predict(texts: List[str], artifacts: Dict[str, object]) -> List[Dict[str, object]]:
     """Predict tags for given texts."""
     x = artifacts["vectorizer"].transform(texts)
     y_pred = custom_predict(

@@ -1,11 +1,11 @@
 import json
 import random
-from typing import Any, Dict
+from typing import Dict, Union
 
 import numpy as np  # type: ignore
 
 
-def load_dict(file_path: str) -> Dict[str, Any]:
+def load_dict(file_path: str) -> Dict[str, object]:
     """Load a dictionary from a JSON's filepath.
 
     Args:
@@ -14,13 +14,16 @@ def load_dict(file_path: str) -> Dict[str, Any]:
     Returns:
         Dict: loaded JSON data.
     """
-    with open(file_path, "r") as fp:
+    with open(file_path) as fp:
         d = json.load(fp)
     return d
 
 
 def save_dict(
-    dict_data: Dict[str, Any], file_path: str, cls: Any = None, sort_keys: bool = False
+    dict_data: Dict[str, object],
+    file_path: str,
+    cls: Union[type[json.JSONEncoder], None] = None,
+    sort_keys: bool = False,
 ) -> None:
     """
     Save a dictionary to a specific location.

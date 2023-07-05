@@ -16,6 +16,30 @@ style:
 	flake8
 	python3 -m isort .
 
+##@ Linting
+
+.PHONY: lint-black
+lint-black: ## black in linting mode
+	@black . --check
+
+.PHONY: lint-isort
+lint-isort: ## isort in linting mode
+	@isort . --check
+
+.PHONY: lint-flake8
+lint-flake8: ## flake8 (linter)
+	@flake8 .
+
+.PHONY: lint-mypy
+lint-mypy: ## mypy (static-type checker)
+	@mypy --explicit-package-bases --config-file pyproject.toml .
+
+.PHONY: lint-mypy-report
+lint-mypy-report: ## run mypy & create report
+	@mypy --explicit-package-bases --config-file pyproject.toml --html-report ./mypy_html .
+
+lint: lint-black lint-isort lint-flake8 lint-mypy ## run all linters
+
 # Environment
 .ONESHELL:
 venv:
